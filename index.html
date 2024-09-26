@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenNCCU OAuth 指南</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #7ce0b2;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 16px;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 10px;
+            background-color: #7ce0b2;
+            color: white;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f1f1f1;
+            padding: 16px;
+            border-radius: 4px;
+            border: 1px solid #d9d9d9;
+            overflow-x: auto;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #7ce0b2;
+            color: white;
+        }
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1em;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #7ce0b2;
+            color: white;
+        }
+    </style>
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";  
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";  
+            evt.currentTarget.className += " active";
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("NodeJS1").style.display = "block";  
+            document.getElementById("NodeJS2").style.display = "block";  
+            document.getElementById("NodeJS3").style.display = "block";  
+        });
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <h1>OpenNCCU OAuth 指南</h1>
+
+    <div class="card">
+        <h2>簡介</h2>
+        <p>OpenNCCU OAuth 是政大校內統一身分驗證的解決方案。本指南將幫助您了解如何使用 OpenNCCU OAuth 進行身分驗證。</p>
+    </div>
+
+    <div class="card">
+        <h2>授權流程</h2>
+        <h3>Step 1: 導向至授權頁面</h3>
+        <p>將用戶導向到以下 URL：</p>
+        <pre>https://oauth.opennccu.com/auth</pre>
+        <p>必要的查詢參數：</p>
+        <table>
+            <tr>
+                <th>參數</th>
+                <th>說明</th>
+            </tr>
+            <tr>
+                <td>client_id</td>
+                <td>您的應用程式 ID</td>
+            </tr>
+            <tr>
+                <td>redirect_uri</td>
+                <td>您申請時填寫的回調 URL</td>
+            </tr>
+            <tr>
+                <td>response_type</td>
+                <td>固定為 "code"</td>
+            </tr>
+            <tr>
+                <td>scope</td>
+                <td>要求的權限範圍，以空格分隔</td>
+            </tr>
+        </table>
+        <p>可選的查詢參數：</p>
+        <table>
+            <tr>
+                <th>參數</th>
+                <th>說明</th>
+            </tr>
+            <tr>
+                <td>state</td>
+                <td>用於防止 CSRF 攻擊的隨機字串</td>
+            </tr>
+        </table>
+        <h3>Request Sample</h3>
+        <div class="tab">
+            <button class="tablinks active" onclick="openTab(event, 'NodeJS1')" id="defaultOpen1">Node.js</button>
+            <button class="tablinks" onclick="openTab(event, 'Python1')">Python</button>
+            <button class="tablinks" onclick="openTab(event, 'cURL1')">cURL</button>
+        </div>
+
+        <div id="NodeJS1" class="tabcontent">
+            <pre><code>const querystring = require('querystring');
+
+const params = querystring.stringify({
+    client_id: 'YOUR_CLIENT_ID',
+    redirect_uri: 'YOUR_REDIRECT_URI',
+    response_type: 'code',
+    scope: 'openid profile email',
+    state: 'RANDOM_STATE_STRING'
+});
+
+const authUrl = `https://oauth.opennccu.com/auth?${params}`;
+console.log('Redirect the user to:', authUrl);</code></pre>
+        </div>
+
+        <div id="Python1" class="tabcontent">
+            <pre><code>from urllib.parse import urlencode
+
+params = urlencode({
+    'client_id': 'YOUR_CLIENT_ID',
+    'redirect_uri': 'YOUR_REDIRECT_URI',
+    'response_type': 'code',
+    'scope': 'openid profile email',
+    'state': 'RANDOM_STATE_STRING'
+})
+
+auth_url = f'https://oauth.opennccu.com/auth?{params}'
+print('Redirect the user to:', auth_url)</code></pre>
+        </div>
+
+        <div id="cURL1" class="tabcontent">
+            <pre><code>curl -X GET 'https://oauth.opennccu.com/auth?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&scope=openid%20profile%20email&state=RANDOM_STATE_STRING'
+            </code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Step 2: 接收授權碼</h3>
+        <p>用戶授權後，會被重定向到您指定的 redirect_uri，並帶有授權碼：</p>
+        <pre>https://your-redirect-uri?code=AUTHORIZATION_CODE&state=RANDOM_STATE_STRING</pre>
+    </div>
+
+    <div class="card">
+        <h3>Step 3: 交換訪問令牌</h3>
+        <p>使用授權碼向以下端點發送 POST 請求以獲取訪問令牌：</p>
+        <pre>https://oauth.opennccu.com/token</pre>
+        <p>請求參數：</p>
+        <table>
+            <tr>
+                <th>參數</th>
+                <th>說明</th>
+            </tr>
+            <tr>
+                <td>grant_type</td>
+                <td>固定為 "authorization_code"</td>
+            </tr>
+            <tr>
+                <td>code</td>
+                <td>上一步獲得的授權碼</td>
+            </tr>
+            <tr>
+                <td>redirect_uri</td>
+                <td>與授權請求中的回調 URL 相同</td>
+            </tr>
+            <tr>
+                <td>client_id</td>
+                <td>您的應用程式 ID</td>
+            </tr>
+            <tr>
+                <td>client_secret</td>
+                <td>您的應用程式密鑰</td>
+            </tr>
+        </table>
+        <h3>Request Sample</h3>
+        <div class="tab">
+            <button class="tablinks active" onclick="openTab(event, 'NodeJS2')" id="defaultOpen2">Node.js</button>
+            <button class="tablinks" onclick="openTab(event, 'Python2')">Python</button>
+            <button class="tablinks" onclick="openTab(event, 'cURL2')">cURL</button>
+        </div>
+
+        <div id="NodeJS2" class="tabcontent">
+            <pre><code>const axios = require('axios');
+
+const data = {
+    grant_type: 'authorization_code',
+    code: 'AUTHORIZATION_CODE',
+    redirect_uri: 'YOUR_REDIRECT_URI',
+    client_id: 'YOUR_CLIENT_ID',
+    client_secret: 'YOUR_CLIENT_SECRET'
+};
+
+axios.post('https://oauth.opennccu.com/token', data)
+    .then(response => {
+        console.log('Access Token:', response.data.access_token);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });</code></pre>
+        </div>
+
+        <div id="Python2" class="tabcontent">
+            <pre><code>import requests
+
+data = {
+    'grant_type': 'authorization_code',
+    'code': 'AUTHORIZATION_CODE',
+    'redirect_uri': 'YOUR_REDIRECT_URI',
+    'client_id': 'YOUR_CLIENT_ID',
+    'client_secret': 'YOUR_CLIENT_SECRET'
+}
+
+response = requests.post('https://oauth.opennccu.com/token', data=data)
+print('Access Token:', response.json().get('access_token'))</code></pre>
+        </div>
+
+        <div id="cURL2" class="tabcontent">
+            <pre><code>curl -X POST 'https://oauth.opennccu.com/token' \
+    -d 'grant_type=authorization_code' \
+    -d 'code=AUTHORIZATION_CODE' \
+    -d 'redirect_uri=YOUR_REDIRECT_URI' \
+    -d 'client_id=YOUR_CLIENT_ID' \
+    -d 'client_secret=YOUR_CLIENT_SECRET'</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Step 4: 使用訪問令牌存取資源</h3>
+        <p>使用訪問令牌存取用戶資訊：</p>
+        <pre>https://oauth.opennccu.com/userinfo</pre>
+        <h3>Request Sample</h3>
+        <div class="tab">
+            <button class="tablinks active" onclick="openTab(event, 'NodeJS3')" id="defaultOpen3">Node.js</button>
+            <button class="tablinks" onclick="openTab(event, 'Python3')">Python</button>
+            <button class="tablinks" onclick="openTab(event, 'cURL3')">cURL</button>
+        </div>
+
+        <div id="NodeJS3" class="tabcontent">
+            <pre><code>const axios = require('axios');
+
+const accessToken = 'YOUR_ACCESS_TOKEN';
+
+axios.get('https://oauth.opennccu.com/userinfo', {
+    headers: {
+        'Authorization': `Bearer ${accessToken}`
+    }
+})
+.then(response => {
+    console.log('User Info:', response.data);
+})
+.catch(error => {
+    console.error('Error:', error);
+});</code></pre>
+        </div>
+
+        <div id="Python3" class="tabcontent">
+            <pre><code>import requests
+
+access_token = 'YOUR_ACCESS_TOKEN'
+headers = {
+    'Authorization': f'Bearer {access_token}'
+}
+
+response = requests.get('https://oauth.opennccu.com/userinfo', headers=headers)
+print('User Info:', response.json())</code></pre>
+        </div>
+
+        <div id="cURL3" class="tabcontent">
+            <pre><code>curl -X GET 'https://oauth.opennccu.com/userinfo' \
+    -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'</code></pre>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>© 2024 OpenNCCU</p>
+</footer>
+
+</body>
+</html>
