@@ -90,24 +90,29 @@
         }
     </style>
     <script>
-        function openTab(evt, tabName) {
+        function openTab(evt, tabName, idx) {
+            console.log(evt, tabName, idx)
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tabcontent");
-            for (i = 0; i < tabcontent.length; i++) {
+            console.log(parseInt(idx/3)*3, idx/3*3+3)
+            for (i = parseInt(idx/3)*3 ; i < parseInt(idx/3)*3+3; i++) {
                 tabcontent[i].style.display = "none";  
             }
             tablinks = document.getElementsByClassName("tablinks");
-            for (i = 0; i < tablinks.length; i++) {
+            for (i = parseInt(idx/3)*3; i < parseInt(idx/3)*3+3; i++) {
                 tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
-            document.getElementById(tabName).style.display = "block";  
+            document.getElementsByClassName("tabcontent")[idx].style.display = "block";
             evt.currentTarget.className += " active";
         }
 
         document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("NodeJS1").style.display = "block";  
             document.getElementById("NodeJS2").style.display = "block";  
-            document.getElementById("NodeJS3").style.display = "block";  
+            document.getElementById("NodeJS3").style.display = "block"; 
+            document.getElementById("defaultOpen1").className += " active";  
+            document.getElementById("defaultOpen2").className += " active";  
+            document.getElementById("defaultOpen3").className += " active";
         });
     </script>
 </head>
@@ -162,9 +167,9 @@
         </table>
         <h3>Request Sample</h3>
         <div class="tab">
-            <button class="tablinks active" onclick="openTab(event, 'NodeJS1')" id="defaultOpen1">Node.js</button>
-            <button class="tablinks" onclick="openTab(event, 'Python1')">Python</button>
-            <button class="tablinks" onclick="openTab(event, 'cURL1')">cURL</button>
+            <button class="tablinks" onclick="openTab(event, 'NodeJS1', 0)" id="defaultOpen1">Node.js</button>
+            <button class="tablinks" onclick="openTab(event, 'Python1', 1)">Python</button>
+            <button class="tablinks" onclick="openTab(event, 'cURL1', 2)">cURL</button>
         </div>
 
         <div id="NodeJS1" class="tabcontent">
@@ -241,9 +246,9 @@ print('Redirect the user to:', auth_url)</code></pre>
         </table>
         <h3>Request Sample</h3>
         <div class="tab">
-            <button class="tablinks active" onclick="openTab(event, 'NodeJS2')" id="defaultOpen2">Node.js</button>
-            <button class="tablinks" onclick="openTab(event, 'Python2')">Python</button>
-            <button class="tablinks" onclick="openTab(event, 'cURL2')">cURL</button>
+            <button class="tablinks" onclick="openTab(event, 'NodeJS2', 3)" id="defaultOpen2">Node.js</button>
+            <button class="tablinks" onclick="openTab(event, 'Python2', 4)">Python</button>
+            <button class="tablinks" onclick="openTab(event, 'cURL2', 5)">cURL</button>
         </div>
 
         <div id="NodeJS2" class="tabcontent">
@@ -297,9 +302,9 @@ print('Access Token:', response.json().get('access_token'))</code></pre>
         <pre>https://oauth.opennccu.com/userinfo</pre>
         <h3>Request Sample</h3>
         <div class="tab">
-            <button class="tablinks active" onclick="openTab(event, 'NodeJS3')" id="defaultOpen3">Node.js</button>
-            <button class="tablinks" onclick="openTab(event, 'Python3')">Python</button>
-            <button class="tablinks" onclick="openTab(event, 'cURL3')">cURL</button>
+            <button class="tablinks" onclick="openTab(event, 'NodeJS3', 6)" id="defaultOpen3">Node.js</button>
+            <button class="tablinks" onclick="openTab(event, 'Python3', 7)">Python</button>
+            <button class="tablinks" onclick="openTab(event, 'cURL3', 8)">cURL</button>
         </div>
 
         <div id="NodeJS3" class="tabcontent">
