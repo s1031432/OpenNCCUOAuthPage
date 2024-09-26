@@ -94,25 +94,24 @@
             console.log(evt, tabName, idx)
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tabcontent");
-            console.log(parseInt(idx/3)*3, idx/3*3+3)
+            console.log(parseInt(idx/3)*3, parseInt(idx/3)*3+3)
             for (i = parseInt(idx/3)*3 ; i < parseInt(idx/3)*3+3; i++) {
                 tabcontent[i].style.display = "none";  
+                console.log(i)
             }
             tablinks = document.getElementsByClassName("tablinks");
             for (i = parseInt(idx/3)*3; i < parseInt(idx/3)*3+3; i++) {
                 tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
             document.getElementsByClassName("tabcontent")[idx].style.display = "block";
-            evt.currentTarget.className += " active";
+            evt.currentTarget.className = "tablinks active";
         }
 
         document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("NodeJS1").style.display = "block";  
-            document.getElementById("NodeJS2").style.display = "block";  
-            document.getElementById("NodeJS3").style.display = "block"; 
-            document.getElementById("defaultOpen1").className += " active";  
-            document.getElementById("defaultOpen2").className += " active";  
-            document.getElementById("defaultOpen3").className += " active";
+            document.getElementById("NodeJS2").style.display = "block"; 
+            document.getElementById("defaultOpen1").className = "tablinks active";  
+            document.getElementById("defaultOpen2").className = "tablinks active";  
         });
     </script>
 </head>
@@ -128,30 +127,30 @@
 
     <div class="card">
         <h2>授權流程</h2>
-        <h3>Step 1: 導向至授權頁面</h3>
+        <h3>步驟 1：設定參數</h3>
         <p>將用戶導向到以下 URL：</p>
         <pre>https://oauth.opennccu.com/auth</pre>
         <p>必要的查詢參數：</p>
         <table>
             <tr>
-                <th>參數</th>
-                <th>說明</th>
+                <th>KEY</th>
+                <th>DESCRIPTION</th>
             </tr>
             <tr>
                 <td>client_id</td>
-                <td>您的應用程式 ID</td>
+                <td>應用程式的用戶端 ID</td>
             </tr>
             <tr>
                 <td>redirect_uri</td>
-                <td>您申請時填寫的回調 URL</td>
+                <td>決定 API 伺服器在使用者完成授權流程後將使用者重新導向的位置。</td>
             </tr>
             <tr>
                 <td>response_type</td>
-                <td>固定為 "code"</td>
+                <td>固定為 <code>code</code></td>
             </tr>
             <tr>
                 <td>scope</td>
-                <td>要求的權限範圍，以空格分隔</td>
+                <td>多個 scope 用<code>,</code>分隔</td>
             </tr>
         </table>
         <p>可選的查詢參數：</p>
@@ -162,7 +161,7 @@
             </tr>
             <tr>
                 <td>state</td>
-                <td>用於防止 CSRF 攻擊的隨機字串</td>
+                <td>指定應用程式用來維持授權要求和授權伺服器回應狀態的任何字串值</td>
             </tr>
         </table>
         <h3>Request Sample</h3>
@@ -208,43 +207,105 @@ print('Redirect the user to:', auth_url)</code></pre>
     </div>
 
     <div class="card">
-        <h3>Step 2: 接收授權碼</h3>
-        <p>用戶授權後，會被重定向到您指定的 redirect_uri，並帶有授權碼：</p>
-        <pre>https://your-redirect-uri?code=AUTHORIZATION_CODE&state=RANDOM_STATE_STRING</pre>
+        <h3>步驟 2：重新導向至 OpenNCCU 的 OAuth 2.0 伺服器</h3>
+        <pre>[xxx]表示這是一個變數，需要自行填入
+https://oauth.opennccu.com/authorize?scope=email,profile,dept&response_type=code&state=[state_parameter_passthrough_value]&redirect_uri=[https%3A//oauth2.example.com/code]&client_id=[client_id]</pre></div>
+    <div class="card">
+        <h3>步驟 3：OpenNCCU 提示使用者提供同意聲明</h3>
+        <p>在這個步驟中，使用者可以決定是否要授予應用程式要求的存取權。</p>
+        
     </div>
 
     <div class="card">
-        <h3>Step 3: 交換訪問令牌</h3>
-        <p>使用授權碼向以下端點發送 POST 請求以獲取訪問令牌：</p>
-        <pre>https://oauth.opennccu.com/token</pre>
-        <p>請求參數：</p>
+        <h3>步驟 4：處理 OAuth 伺服器回應</h3>
+        <p>OAuth 伺服器會使用要求中指定的網址，回應應用程式的存取要求。</p>
+        <p>如果使用者核准存取要求，回應就會包含授權碼。如果使用者未核准要求，回應會包含錯誤訊息。傳回到網路伺服器的授權碼或錯誤訊息會顯示在查詢字串中，如下所示：</p>
+        <p>錯誤回應：</p>
+        <pre>https://oauth2.example.com/code?error=access_denied&</pre>
+        <p>授權碼回應</p>
+        <pre>https://oauth2.example.com/auth?code=869e308c64a03f3e0e2d81db510f893c6ad3d063c8e90dafef7742ae30e87b27</pre>
+        <p>完成 OAuth 流程後，系統應會將您重新導向至 <a href="http://localhost/oauth2callback">http://localhost/oauth2callback</a></p>
+        <p>下一步是在使用者將使用者重新導向至應用程式時，傳回 URI 中傳回的資訊。</p>
+        <h3>Request Sample</h3>
+    </div>
+
+    <div class="card">
+        <h3>步驟 5：交換 refresh_token 和 access_token</h3>
+        <p>請呼叫 <a href="https://oauth.opennccu.com/token">https://oauth.opennccu.com/token</a> 並帶上以下</p>
+        <p><code>POST Body</code></p>
         <table>
             <tr>
-                <th>參數</th>
-                <th>說明</th>
-            </tr>
-            <tr>
-                <td>grant_type</td>
-                <td>固定為 "authorization_code"</td>
-            </tr>
-            <tr>
-                <td>code</td>
-                <td>上一步獲得的授權碼</td>
-            </tr>
-            <tr>
-                <td>redirect_uri</td>
-                <td>與授權請求中的回調 URL 相同</td>
+                <th>KEY</th>
+                <th>DESCRIPTION</th>
             </tr>
             <tr>
                 <td>client_id</td>
-                <td>您的應用程式 ID</td>
+                <td>應用程式的用戶端 ID</td>
             </tr>
             <tr>
                 <td>client_secret</td>
-                <td>您的應用程式密鑰</td>
+                <td>應用程式的用戶端密碼</td>
+            </tr>
+            <tr>
+                <td>code</td>
+                <td>步驟 4 中取得的授權碼</td>
+            </tr>
+            <tr>
+                <td>grant_type</td>
+                <td>authorization_code</td>
+            </tr>
+            <tr>
+                <td>redirect_uri</td>
+                <td>先前步驟中使用的網址。</td>
             </tr>
         </table>
-        <h3>Request Sample</h3>
+        <p>範例</p>
+        <pre>[xxx]表示這是一個變數，需要自行填入
+POST /token HTTP/1.1
+Host: oauth.opennccu.com
+Content-Type: application/x-www-form-urlencoded
+
+code=[先前回傳的code]&
+client_id=[your_client_id]&
+client_secret=[your_client_secret]&
+redirect_uri=[https%3A//oauth2.example.com/code]&
+grant_type=authorization_code</pre>
+        <p>回傳的 JSON 會包含下列資訊：</p>
+        <table>
+            <tr>
+                <th>KEY</th>
+                <th>DESCRIPTION</th>
+            </tr>
+            <tr>
+                <td>access_token</td>
+                <td>用來取得資料的 token，有效期限 1 小時</td>
+            </tr>
+            <tr>
+                <td>expires_in</td>
+                <td>有效期限，單位為秒</td>
+            </tr>
+            <tr>
+                <td>refresh_token</td>
+                <td>用來更新 <code>access_token</code> 的 token，有效期限 30 天</td>
+            </tr>
+            <tr>
+                <td>scope</td>
+                <td>權限，以空白分隔</td>
+            </tr>
+            <tr>
+                <td>token_type</td>
+                <td><code>Bearer</code></td>
+            </tr>
+        </table>
+        <p>範例：</p>
+        <pre>
+{
+    "access_token": "54f91e3551c7c88fc1c9461ecd27267686ad9e19a7d52a784d51d41f2cc143b9",
+    "expires_in": 3600,
+    "token_type": "Bearer",
+    "scope": "profile dept",
+    "refresh_token": "be0545b14ede593cfe30ea4a827cd53a9774bff620f8aed580eec30a48c9703b"
+}</pre>
         <div class="tab">
             <button class="tablinks" onclick="openTab(event, 'NodeJS2', 3)" id="defaultOpen2">Node.js</button>
             <button class="tablinks" onclick="openTab(event, 'Python2', 4)">Python</button>
@@ -252,76 +313,12 @@ print('Redirect the user to:', auth_url)</code></pre>
         </div>
 
         <div id="NodeJS2" class="tabcontent">
-            <pre><code>const axios = require('axios');
-
-const data = {
-    grant_type: 'authorization_code',
-    code: 'AUTHORIZATION_CODE',
-    redirect_uri: 'YOUR_REDIRECT_URI',
-    client_id: 'YOUR_CLIENT_ID',
-    client_secret: 'YOUR_CLIENT_SECRET'
-};
-
-axios.post('https://oauth.opennccu.com/token', data)
-    .then(response => {
-        console.log('Access Token:', response.data.access_token);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });</code></pre>
-        </div>
-
-        <div id="Python2" class="tabcontent">
-            <pre><code>import requests
-
-data = {
-    'grant_type': 'authorization_code',
-    'code': 'AUTHORIZATION_CODE',
-    'redirect_uri': 'YOUR_REDIRECT_URI',
-    'client_id': 'YOUR_CLIENT_ID',
-    'client_secret': 'YOUR_CLIENT_SECRET'
-}
-
-response = requests.post('https://oauth.opennccu.com/token', data=data)
-print('Access Token:', response.json().get('access_token'))</code></pre>
-        </div>
-
-        <div id="cURL2" class="tabcontent">
-            <pre><code>curl -X POST 'https://oauth.opennccu.com/token' \
-    -d 'grant_type=authorization_code' \
-    -d 'code=AUTHORIZATION_CODE' \
-    -d 'redirect_uri=YOUR_REDIRECT_URI' \
-    -d 'client_id=YOUR_CLIENT_ID' \
-    -d 'client_secret=YOUR_CLIENT_SECRET'</code></pre>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>Step 4: 使用訪問令牌存取資源</h3>
-        <p>使用訪問令牌存取用戶資訊：</p>
-        <pre>https://oauth.opennccu.com/userinfo</pre>
-        <h3>Request Sample</h3>
-        <div class="tab">
-            <button class="tablinks" onclick="openTab(event, 'NodeJS3', 6)" id="defaultOpen3">Node.js</button>
-            <button class="tablinks" onclick="openTab(event, 'Python3', 7)">Python</button>
-            <button class="tablinks" onclick="openTab(event, 'cURL3', 8)">cURL</button>
-        </div>
-
-        <div id="NodeJS3" class="tabcontent">
-            <pre><code>const axios = require('axios');
-
-const accessToken = 'YOUR_ACCESS_TOKEN';
-
-axios.get('https://oauth.opennccu.com/userinfo', {
-    headers: {
-        'Authorization': `Bearer ${accessToken}`
-    }
-})
-.then(response => {
-    console.log('User Info:', response.data);
-})
-.catch(error => {
-    console.error('Error:', error);
+            <pre><code>fetch("https://oauth.opennccu.com/token", {
+method: "POST",
+headers: {
+    "Content-Type": "application/x-www-form-urlencoded",
+},
+body: `grant_type=authorization_code&code=${query.code}&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&redirect_uri=${REDIRECT_URL}`,
 });</code></pre>
         </div>
 
