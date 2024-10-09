@@ -10,6 +10,7 @@
             background-color: #f0f2f5;
             line-height: 1.6;
             color: #333;
+            margin: 0px;
         }
         .container {
             max-width: 800px;
@@ -87,6 +88,7 @@
         th {
             background-color: #7ce0b2;
             color: white;
+            text-align: center;
         }
     </style>
     <script>
@@ -130,8 +132,7 @@
     <div class="card">
         <h2>授權流程</h2>
         <h3>步驟 1：設定參數</h3>
-        <p>將用戶導向到以下 URL：</p>
-        <pre>https://oauth.opennccu.com/auth</pre>
+
         <p>必要的查詢參數：</p>
         <table>
             <tr>
@@ -155,7 +156,32 @@
                 <td>多個 scope 用<code>,</code>分隔</td>
             </tr>
         </table>
-        <p>可選的查詢參數：</p>
+        <table>
+            <tr>
+                <th colspan="2" style="background-color: #aaa;">scope</th>
+            </tr>
+            <tr>
+                <th>KEY</th>
+                <th>DESCRIPTION</th>
+            </tr>
+            <tr>
+                <td>profile</td>
+                <td>個人資料</td>
+            </tr>
+            <tr>
+                <td>dept</td>
+                <td>系所、入學年</td>
+            </tr>
+            <tr>
+                <td>email</td>
+                <td>電子郵件</td>
+            </tr>
+            <tr>
+                <td>inccu</td>
+                <td>iNCCU 全人資訊</td>
+            </tr>
+        </table>
+        <p>建議使用</p>
         <table>
             <tr>
                 <th>參數</th>
@@ -227,13 +253,24 @@ https://oauth.opennccu.com/authorize?scope=email,profile,dept&response_type=code
         <p>授權碼回應</p>
         <pre>https://oauth2.example.com/auth?code=869e308c64a03f3e0e2d81db510f893c6ad3d063c8e90dafef7742ae30e87b27</pre>
         <p>完成 OAuth 流程後，系統應會將您重新導向至 <a href="http://localhost/oauth2callback"><code>http://localhost/oauth2callback</code></a></p>
-        <p>下一步是在使用者將使用者重新導向至應用程式時，傳回 URI 中傳回的資訊。</p>
+        <p>下一步是在重新導向至應用程式時，傳回 URI 中傳回的資訊。</p>
         <h3>Request Sample</h3>
     </div>
 
     <div class="card">
         <h3>步驟 5：交換 refresh_token 和 access_token</h3>
         <p>請呼叫 <a href="https://oauth.opennccu.com/token"><code>https://oauth.opennccu.com/token</code></a> 並帶上以下</p>
+        <p><code>POST Headers</code></p>
+        <table>
+            <tr>
+                <th>KEY</th>
+                <th>VALUE</th>
+            </tr>
+            <tr>
+                <td><code>Content-Type</code></td>
+                <td><code>application/x-www-form-urlencoded</code></td>
+            </tr>
+        </table>
         <p><code>POST Body</code></p>
         <table>
             <tr>
@@ -350,7 +387,7 @@ print('User Info:', response.json())</code></pre>
 GET /data/ HTTP/1.1
 Host: oauth.opennccu.com
 Authorization: Bearer [您的 access_token]</pre>
-        <p>如果授權被用戶在 Open NCCU 取消，該個 key 會寫"unauthorized"</p>
+        <p>如果授權被使用者在 Open NCCU 取消，該個 key 會寫"unauthorized"</p>
         <p>例如</p>
         <pre>
 {
@@ -374,17 +411,39 @@ Authorization: Bearer [您的 access_token]</pre>
         </div>
 
         <div id="Python3" class="tabcontent">
-            <pre><code></code></pre>
+            <pre><code>import requests
+
+url = "https://oauth.opennccu.com/data"
+headers = {
+    "Authorization": f"Bearer {accessToken}"
+}
+
+response = requests.get(url, headers=headers)
+
+# If you want to print the response:
+print(response.status_code)
+print(response.json())  # Assuming the response is in JSON format</code></pre>
         </div>
 
         <div id="cURL3" class="tabcontent">
-            <pre><code></code></pre>
+            <pre><code>curl -X GET "https://oauth.opennccu.com/data" \
+-H "Authorization: Bearer $accessToken"</code></pre>
         </div>
     </div>
     <div class="card">
         <h3>使用 refresh_token 更新 access_token</h3>
         <p>請呼叫 <a href="https://oauth.opennccu.com/token"><code>https://oauth.opennccu.com/token</code></a> 並帶上以下</p>
-        <p>Content-Type: application/x-www-form-urlencoded</p>
+        <p><code>POST Headers</code></p>
+        <table>
+            <tr>
+                <th>KEY</th>
+                <th>VALUE</th>
+            </tr>
+            <tr>
+                <td><code>Content-Type</code></td>
+                <td><code>application/x-www-form-urlencoded</code></td>
+            </tr>
+        </table>
         <p><code>POST Body</code></p>
         <table>
             <tr>
@@ -472,11 +531,31 @@ grant_type=refresh_token</pre>
         </div>
 
         <div id="Python4" class="tabcontent">
-            <pre><code></code></pre>
+            <pre><code>import requests
+
+url = "https://oauth.opennccu.com/api/token"
+headers = {
+    "Content-Type": "application/x-www-form-urlencoded"
+}
+
+data = {
+    "grant_type": "refresh_token",
+    "refresh_token": refreshToken,  # Replace with your actual refresh token
+    "client_id": "your_client_id",  # Replace with your actual client ID
+    "client_secret": "your_client_secret"  # Replace with your actual client secret
+}
+
+response = requests.post(url, headers=headers, data=data)
+
+# If you want to print the response:
+print(response.status_code)
+print(response.json())  # Assuming the response is in JSON format</code></pre>
         </div>
 
         <div id="cURL4" class="tabcontent">
-            <pre><code></code></pre>
+            <pre><code>curl -X POST "https://oauth.opennccu.com/api/token" \
+-H "Content-Type: application/x-www-form-urlencoded" \
+-d "grant_type=refresh_token&refresh_token=$refreshToken&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET"</code></pre>
         </div>
     </div>
     <div class="card">
@@ -504,11 +583,12 @@ grant_type=refresh_token</pre>
             </tr>
         </table>
     </div>
+    <div class="card">
+        Authored by <a href="https://github.com/CTHua">CTHua</a>
+    </div>
 </div>
-
 <footer>
     <p>© 2024 OpenNCCU</p>
 </footer>
-
 </body>
 </html>
